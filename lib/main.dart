@@ -10,7 +10,7 @@ Future<void> runMainApp() async {
     SystemUiMode.manual,
     overlays: [SystemUiOverlay.bottom, SystemUiOverlay.top],
   );
-  
+
   ErrorWidget.builder = errorBuilderWidget;
 
   // Add your initialization code here
@@ -29,13 +29,9 @@ Widget errorBuilderWidget(FlutterErrorDetails details) {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const Text(
-                "An Error Was Encountered",
-              ),
+              const Text("An Error Was Encountered"),
               const SizedBox(height: 32),
-              Text(
-                details.exception.toString(),
-              ),
+              Text(details.exception.toString()),
             ],
           ),
         ),

@@ -1,9 +1,21 @@
+import java.util.Base64
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+val dartDefines = project.findProperty("dart-defines")?.toString()
+    ?.split(",")
+    ?.associate {
+        val pair = String(Base64.getDecoder().decode(it), Charsets.UTF_8).split("=")
+        pair.first() to pair.last()
+    } ?: emptyMap()
+
+
+
 
 android {
     namespace = "com.applifylab.ai_chat_app"

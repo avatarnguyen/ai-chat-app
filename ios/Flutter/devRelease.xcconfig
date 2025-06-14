@@ -4,3 +4,5 @@
 ASSET_PREFIX=dev
 BUNDLE_NAME=Ai Chat App Dev
 BUNDLE_DISPLAY_NAME=Ai Chat App Dev
+
+#include "Dart-Defines.xcconfig"

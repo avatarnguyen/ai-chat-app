@@ -1,0 +1,21 @@
+projectName: ai_chat_app
+appName: Ai Chat App
+organisationName: com.applifylab
+git: true
+gitRemoteUrl: "git@github.com:avatarnguyen/ai-chat-app.git"
+starterProject: flutter_starter
+environments: 
+  - dev
+  - prod
+
+components: 
+  - core_app_icon
+  - core_splash_screen
+  - core_localizations
+
+params: 
+  flutter_version: 3.29.2
+  app_name: Ai Chat App
+
+executors: 
+  - android_configurations

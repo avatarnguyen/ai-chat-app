@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:ai_chat_app/l10n/l10n.dart';
 import 'package:flutter/services.dart';
 
 // Define color variables
@@ -35,6 +36,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: purpleColor),
         useMaterial3: true,
       ),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: const MyHomePage(title: 'Ai Chat App'),
       builder: (context, child) {
         return Banner(
@@ -139,6 +142,12 @@ class _MyHomePageState extends State<MyHomePage> {
         // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
         // change color while the other colors stay the same.
         backgroundColor: purpleColor.withAlpha(1 - purpleAlpha),
+        actions: [
+          IconButton(
+            onPressed: () => showLocalizationDialog(context),
+            icon: const Icon(Icons.language),
+          ),
+        ],
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
@@ -192,7 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("You have pushed the button this many times:"),
+                Text(context.l10n.youHavePushedTheButtonThisManyTimes),
                 Text(
                   '$_counter',
                   style: Theme.of(context).textTheme.headlineMedium,
@@ -227,4 +236,98 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+}
+
+void showLocalizationDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder:
+        (context) => AlertDialog(
+          title: Center(child: Text('Localization Example')),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                // 1. Placeholder example
+                const Text(
+                  'Placeholder Example:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(context.l10n.hello('John')),
+                ),
+
+                // 2. Plural example
+                const Text(
+                  'Plural Examples:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(context.l10n.nWombats(0)),
+                      Text(context.l10n.nWombats(1)),
+                      Text(context.l10n.nWombats(5)),
+                    ],
+                  ),
+                ),
+
+                // 3. Select/Gender example
+                const Text(
+                  'Select/Gender Examples:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(context.l10n.pronoun('male')),
+                      Text(context.l10n.pronoun('female')),
+                      Text(context.l10n.pronoun('other')),
+                    ],
+                  ),
+                ),
+
+                // 4. Number formatting example
+                const Text(
+                  'Number Formatting Example:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(context.l10n.numberOfDataPoints(1200000)),
+                ),
+
+                // 5. Date formatting example
+                const Text(
+                  'Date Formatting Example:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    context.l10n.helloWorldOn(DateTime.utc(1959, 7, 9)),
+                  ),
+                ),
+
+                // 6. Escaping syntax example
+                const Text(
+                  'Escaping Syntax Example:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(context.l10n.escapedExample),
+                ),
+              ],
+            ),
+          ),
+        ),
+  );
 }
