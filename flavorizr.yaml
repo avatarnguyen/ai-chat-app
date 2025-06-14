@@ -1,0 +1,37 @@
+app:
+  android:
+    flavorDimensions: "flavor-type"
+flavors:
+  dev:
+    app:
+      name: "Ai Chat App Dev"
+    android:
+      applicationId: "com.applifylab.ai_chat_app.dev"
+      # icon: "assets/envs/dev/app-icon.png"
+      # adaptiveIcon:
+      #   foreground: "assets/envs/dev/app-icon-foreground.png"
+      #   background: "assets/envs/dev/app-icon-background.png"
+    ios:
+      bundleId: "com.applifylab.aiChatApp.dev"
+      # icon: "assets/envs/dev/app-icon.png"
+    macos:
+      bundleId: "com.applifylab.aiChatApp.dev"
+      # icon: "assets/envs/dev/app-icon.png"
+  
+  
+  
+  prod:
+    app:
+      name: "Ai Chat App"
+    android:
+      applicationId: "com.applifylab.ai_chat_app"  
+      # icon: "assets/envs/prod/app-icon.png"
+      # adaptiveIcon:
+      #   foreground: "assets/envs/prod/app-icon-foreground.png"
+      #   background: "assets/envs/prod/app-icon-background.png"
+    ios:
+      bundleId: "com.applifylab.aiChatApp"
+      # icon: "assets/envs/prod/app-icon.png"
+    macos:
+      bundleId: "com.applifylab.aiChatApp"
+      # icon: "assets/envs/prod/app-icon.png"
