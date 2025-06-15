@@ -95,4 +95,13 @@ node_modules/
 # OS specific
 # Task files
 tasks.json
-tasks/ 
+tasks/
+
+# Supabase
+supabase/.temp/
+supabase/.branches/
+supabase/.git/
+supabase/logs/
+supabase/docker/
+.env.local
+.env.production
