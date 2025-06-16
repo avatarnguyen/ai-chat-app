@@ -1,3 +1,4 @@
+import 'package:ai_chat_app/core/config/supabase_config.dart';
 import 'package:flutter/material.dart';
 import 'package:ai_chat_app/app.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -13,7 +14,14 @@ Future<void> runMainApp() async {
 
   ErrorWidget.builder = errorBuilderWidget;
 
-  // Add your initialization code here
+  // Initialize environment variables and Supabase
+  try {
+    // Initialize Supabase with loaded environment variables
+    await SupabaseConfig.initialize();
+  } catch (e) {
+    debugPrint('Failed to initialize Supabase: $e');
+    // Continue app initialization even if Supabase fails
+  }
 
   FlutterNativeSplash.remove();
 
