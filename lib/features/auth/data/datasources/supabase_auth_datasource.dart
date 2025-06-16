@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:ai_chat_app/core/config/supabase_config.dart';
 import 'package:ai_chat_app/features/auth/data/models/user_model.dart';
+import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/repositories/auth_repository.dart' as repo;
 
 /// Supabase implementation of authentication data source
+@singleton
 class SupabaseAuthDataSource {
   SupabaseAuthDataSource() : _supabase = SupabaseConfig.client;
 

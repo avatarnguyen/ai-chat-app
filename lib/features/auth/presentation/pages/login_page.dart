@@ -162,9 +162,9 @@ class _LoginPageState extends State<LoginPage> {
                     _isSignUpMode
                         ? 'Sign up to start chatting with AI'
                         : 'Sign in to continue your conversations',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey.withValues(alpha: 0.6),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),

@@ -5,7 +5,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:mime/mime.dart';
 import 'package:crypto/crypto.dart';
-
 import '../constants/storage_constants.dart';
 import '../models/file_attachment.dart';
 
@@ -69,7 +68,7 @@ class StorageService {
       );
 
       // Upload file to Supabase Storage
-      final uploadResult = await _supabase.storage
+      await _supabase.storage
           .from(StorageConstants.chatAttachmentsBucket)
           .uploadBinary(
             storagePath,

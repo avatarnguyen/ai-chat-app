@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:path/path.dart' as path;
 
 import '../models/file_attachment.dart';
@@ -13,9 +12,11 @@ class AttachmentService {
   final StorageService _storageService;
   final FilePickerService _filePickerService;
 
-  AttachmentService({required SupabaseClient supabaseClient})
-    : _storageService = StorageService(supabaseClient),
-      _filePickerService = FilePickerService();
+  AttachmentService({
+    required StorageService storageService,
+    required FilePickerService filePickerService,
+  }) : _storageService = storageService,
+       _filePickerService = filePickerService;
 
   /// Pick and upload file attachments for a message
   Future<AttachmentResult> pickAndUploadAttachments({

@@ -1,13 +1,14 @@
 import 'dart:async';
+import 'package:injectable/injectable.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/supabase_auth_datasource.dart';
 import '../../../../core/config/supabase_config.dart';
 
 /// Implementation of [AuthRepository] using Supabase
+@LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl({SupabaseAuthDataSource? authDataSource})
-    : _authDataSource = authDataSource ?? SupabaseAuthDataSource();
+  const AuthRepositoryImpl(this._authDataSource);
 
   final SupabaseAuthDataSource _authDataSource;
 

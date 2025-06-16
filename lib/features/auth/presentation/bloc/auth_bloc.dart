@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 /// Bloc for managing authentication state and events
+@injectable
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc({required AuthRepository authRepository})
-    : _authRepository = authRepository,
-      super(const AuthInitial()) {
+  AuthBloc(this._authRepository) : super(const AuthInitial()) {
     // Register event handlers
     on<AuthInitialized>(_onAuthInitialized);
     on<AuthStateChanged>(_onAuthStateChanged);
