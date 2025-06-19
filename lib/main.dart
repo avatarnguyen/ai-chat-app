@@ -1,5 +1,6 @@
 import 'package:ai_chat_app/core/config/supabase_config.dart';
 import 'package:ai_chat_app/core/di/injection_container.dart';
+import 'package:ai_chat_app/flavors.dart';
 import 'package:flutter/material.dart';
 import 'package:ai_chat_app/app.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -22,26 +23,19 @@ Future<void> runMainApp() async {
     debugPrint('✅ Supabase initialized successfully');
   } catch (e) {
     debugPrint('❌ Failed to initialize Supabase: $e');
-    // Continue app initialization even if Supabase fails in development
-    if (const bool.fromEnvironment('dart.vm.product')) {
-      // In production, show error and don't continue
-      runApp(ErrorApp(error: 'Failed to initialize: $e'));
-      return;
-    }
+    return;
   }
 
   // Initialize dependency injection based on environment
   try {
-    const isProduction = bool.fromEnvironment('dart.vm.product');
-    const isDevelopment = bool.fromEnvironment(
-      'DEVELOPMENT',
-      defaultValue: false,
-    );
+    final flavor = getFlavor();
+    final isProd = flavor == Flavor.prod;
+    final isDev = flavor == Flavor.dev;
 
-    if (isProduction) {
+    if (isProd) {
       await configureProductionDependencies();
       debugPrint('✅ Production dependency injection initialized');
-    } else if (isDevelopment) {
+    } else if (isDev) {
       await configureDevelopmentDependencies();
       debugPrint('✅ Development dependency injection initialized');
     } else {
