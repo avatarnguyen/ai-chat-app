@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_state.dart';
-import '../pages/login_page.dart';
+import '../pages/auth_ui_page.dart';
 import '../../domain/entities/user.dart';
 
 /// Authentication wrapper that handles routing based on auth state
@@ -52,7 +52,7 @@ class AuthWrapper extends StatelessWidget {
         }
 
         // Handle unauthenticated state (default)
-        return unauthenticatedBuilder?.call(context) ?? const LoginPage();
+        return unauthenticatedBuilder?.call(context) ?? const AuthUIPage();
       },
     );
   }
@@ -185,7 +185,7 @@ mixin AuthRequiredMixin<T extends StatefulWidget> on State<T> {
     if (!authBloc.isAuthenticated) {
       Navigator.of(
         context,
-      ).pushNamedAndRemoveUntil(LoginPage.routeName, (route) => false);
+      ).pushNamedAndRemoveUntil(AuthUIPage.routeName, (route) => false);
     }
   }
 }
@@ -212,10 +212,10 @@ extension AuthenticationHelper on BuildContext {
     read<AuthBloc>().signOut();
   }
 
-  /// Navigate to login page
-  void navigateToLogin() {
+  /// Navigate to auth page
+  void navigateToAuth() {
     Navigator.of(
       this,
-    ).pushNamedAndRemoveUntil(LoginPage.routeName, (route) => false);
+    ).pushNamedAndRemoveUntil(AuthUIPage.routeName, (route) => false);
   }
 }

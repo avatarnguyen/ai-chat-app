@@ -20,6 +20,10 @@ dependencies:
   supabase_flutter: ^2.8.0
   supabase_auth_ui: ^0.5.5
 
+  # OAuth authentication
+  google_sign_in: ^6.1.6
+  sign_in_with_apple: ^6.1.4
+
   # State management with Bloc
   flutter_bloc: ^9.1.1
   bloc: ^9.0.0

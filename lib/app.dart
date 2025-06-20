@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ai_chat_app/l10n/l10n.dart';
 import 'core/di/bloc_providers.dart';
 import 'features/auth/presentation/widgets/auth_wrapper.dart';
-import 'features/auth/presentation/pages/login_page.dart';
+import 'features/auth/presentation/pages/auth_ui_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'features/auth/domain/entities/user.dart';
 
@@ -131,7 +131,7 @@ class MyApp extends StatelessWidget {
           supportedLocales: AppLocalizations.supportedLocales,
           home: const AuthWrapper(authenticatedBuilder: _buildHomePage),
           routes: {
-            LoginPage.routeName: (context) => const LoginPage(),
+            AuthUIPage.routeName: (context) => const AuthUIPage(),
             HomePage.routeName: (context) => const HomePage(),
           },
           builder: (context, child) {

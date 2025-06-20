@@ -1,0 +1,24 @@
+# Project Rules for AI Chat App
+
+## Project Description
+
+Below you will find specifications about this project. Make sure to follow the project convention and Style.
+
+## Project Context
+
+Mobile App using Flutter and Dart. This is a AI Chat App that:
+
+- chat with ai and automate with ai
+- help user organize their ai chats
+
+## Testing
+
+- Unit Testing with Mocktail and bloc_test
+
+## Coding Rules
+
+- Create a new file for each widget.
+- Use StatelessWidget if possible.
+- Keep state as local as possible
+- Avoid using Extracting Widgets into Methods, prefer to extract in separate Widgets.
+- Use tool `context7` to get documentation if needed

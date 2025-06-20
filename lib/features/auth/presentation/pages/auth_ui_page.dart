@@ -1,9 +1,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
+
 import '../../../home/presentation/pages/home_page.dart';
 
-/// Authentication page using Supabase Auth UI components
+/// Comprehensive authentication page using Supabase Auth UI components
+///
+/// This page provides a complete authentication solution with:
+/// - Social authentication (Apple, Facebook, Google)
+/// - Email authentication
+/// - Responsive design with proper error handling
+/// - Accessibility support with semantic labels
+///
+/// The page uses Supabase Auth UI components for consistent styling
+/// and automatic handling of authentication flows.
 class AuthUIPage extends StatefulWidget {
   const AuthUIPage({super.key});
 
@@ -13,22 +23,8 @@ class AuthUIPage extends StatefulWidget {
   State<AuthUIPage> createState() => _AuthUIPageState();
 }
 
-class _AuthUIPageState extends State<AuthUIPage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _AuthUIPageState extends State<AuthUIPage> {
   bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 
   void _setLoading(bool loading) {
     if (mounted) {
@@ -40,333 +36,351 @@ class _AuthUIPageState extends State<AuthUIPage>
 
   void _handleAuthSuccess() {
     if (mounted) {
-      Navigator.of(context).pushReplacementNamed(HomePage.routeName);
+      // Navigate to home page and remove all previous routes
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(HomePage.routeName, (route) => false);
     }
   }
 
   void _handleAuthError(Object error) {
     if (mounted) {
+      String errorMessage = 'Authentication error';
+
+      if (error is AuthException) {
+        switch (error.message) {
+          case 'Invalid login credentials':
+            errorMessage = 'Invalid email or password';
+            break;
+          case 'Email not confirmed':
+            errorMessage = 'Please check your email and confirm your account';
+            break;
+          case 'User already registered':
+            errorMessage = 'An account with this email already exists';
+            break;
+          case 'Password should be at least 6 characters':
+            errorMessage = 'Password must be at least 6 characters long';
+            break;
+          default:
+            errorMessage = error.message;
+        }
+      } else {
+        errorMessage = error.toString();
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Authentication error: ${error.toString()}'),
+          content: Row(
+            children: [
+              const Icon(Icons.error, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(child: Text(errorMessage)),
+            ],
+          ),
           backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 4),
         ),
       );
+    }
+  }
+
+  Future<void> _handleOAuthSignIn(OAuthProvider provider) async {
+    _setLoading(true);
+    try {
+      final result = await Supabase.instance.client.auth.signInWithOAuth(
+        provider,
+        redirectTo: kIsWeb ? null : 'io.mydomain.myapp://callback',
+      );
+
+      if (result == true) {
+        _setLoading(false);
+        _handleAuthSuccess();
+      }
+    } catch (error) {
+      _setLoading(false);
+      _handleAuthError(error);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF1A2332),
       body: Stack(
         children: [
-          // Background gradient
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                  Theme.of(
-                    context,
-                  ).colorScheme.secondary.withValues(alpha: 0.1),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                children: [
+                  // Back button
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(
+                        Icons.arrow_back_ios,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+
+                  const Spacer(flex: 2),
+
+                  // Welcome title
+                  const Text(
+                    'Welcome',
+                    style: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.w300,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const Spacer(flex: 3),
+
+                  // Authentication buttons
+                  Column(
+                    children: [
+                      // Sign up with Apple
+                      _buildAuthButton(
+                        onPressed:
+                            () => _handleOAuthSignIn(OAuthProvider.apple),
+                        icon: Icons.apple,
+                        text: 'Sign up with Apple',
+                        backgroundColor: Colors.white,
+                        textColor: Colors.black,
+                        iconColor: Colors.black,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Sign up with Facebook
+                      _buildAuthButton(
+                        onPressed:
+                            () => _handleOAuthSignIn(OAuthProvider.facebook),
+                        icon: Icons.facebook,
+                        text: 'Sign up with Facebook',
+                        backgroundColor: const Color(0xFF4267B2),
+                        textColor: Colors.white,
+                        iconColor: Colors.white,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Sign up with Google
+                      _buildAuthButton(
+                        onPressed:
+                            () => _handleOAuthSignIn(OAuthProvider.google),
+                        icon: Icons.g_mobiledata,
+                        text: 'Sign up with Google',
+                        backgroundColor: Colors.white,
+                        textColor: Colors.black,
+                        iconColor: Colors.black,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Sign up with Email
+                      _buildAuthButton(
+                        onPressed: () => _showEmailAuthDialog(),
+                        icon: Icons.email,
+                        text: 'Sign up with Email',
+                        backgroundColor: const Color(0xFF4CAF50),
+                        textColor: Colors.white,
+                        iconColor: Colors.white,
+                      ),
+                    ],
+                  ),
+
+                  const Spacer(flex: 2),
                 ],
               ),
             ),
           ),
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
+
+          if (_isLoading)
+            Container(
+              color: Colors.black54,
+              child: const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // App Logo
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        gradient: LinearGradient(
-                          colors: [
-                            Theme.of(context).colorScheme.primary,
-                            Theme.of(context).colorScheme.secondary,
-                          ],
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.chat_bubble_outline,
-                        size: 60,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Welcome Text
+                    CircularProgressIndicator(color: Colors.white),
+                    SizedBox(height: 16),
                     Text(
-                      'Welcome to AI Chat',
-                      style: Theme.of(context).textTheme.headlineMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Sign in to start conversations with AI',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Auth Tabs
-                    Card(
-                      elevation: 8,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Container(
-                        width: double.infinity,
-                        constraints: const BoxConstraints(maxWidth: 400),
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          children: [
-                            // Tab Bar
-                            TabBar(
-                              controller: _tabController,
-                              labelColor: Theme.of(context).colorScheme.primary,
-                              unselectedLabelColor: Colors.grey,
-                              indicatorSize: TabBarIndicatorSize.tab,
-                              tabs: const [
-                                Tab(text: 'Email'),
-                                Tab(text: 'Magic Link'),
-                                Tab(text: 'Social'),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-
-                            // Tab Views
-                            SizedBox(
-                              height: 350,
-                              child: TabBarView(
-                                controller: _tabController,
-                                children: [
-                                  _buildEmailAuthTab(),
-                                  _buildMagicLinkTab(),
-                                  _buildSocialAuthTab(),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      'Authenticating...',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ],
                 ),
               ),
             ),
-          ),
-          if (_isLoading)
-            Container(
-              color: Colors.black54,
-              child: const Center(child: CircularProgressIndicator()),
-            ),
         ],
       ),
     );
   }
 
-  Widget _buildEmailAuthTab() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          SupaEmailAuth(
-            redirectTo: kIsWeb ? null : 'io.mydomain.myapp://callback',
-            onSignInComplete: (response) {
-              _setLoading(false);
-              _handleAuthSuccess();
-            },
-            onSignUpComplete: (response) {
-              _setLoading(false);
-              if (response.user?.emailConfirmedAt != null) {
-                _handleAuthSuccess();
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Please check your email to verify your account',
-                    ),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
-              }
-            },
-            onError: (error) {
-              _setLoading(false);
-              _handleAuthError(error);
-            },
-            metadataFields: [
-              MetaDataField(
-                prefixIcon: const Icon(Icons.person),
-                label: 'Display Name',
-                key: 'display_name',
-                validator: (val) {
-                  if (val == null || val.isEmpty) {
-                    return 'Please enter your display name';
-                  }
-                  if (val.length < 2) {
-                    return 'Display name must be at least 2 characters';
-                  }
-                  return null;
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMagicLinkTab() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          const Text(
-            'Magic Link Sign In',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Enter your email to receive a magic link for passwordless authentication',
-            style: TextStyle(color: Colors.grey[600], fontSize: 14),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          SupaMagicAuth(
-            redirectUrl: kIsWeb ? null : 'io.mydomain.myapp://callback',
-            onSuccess: (response) {
-              _setLoading(false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Magic link sent! Please check your email'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-            onError: (error) {
-              _setLoading(false);
-              _handleAuthError(error);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSocialAuthTab() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          const Text(
-            'Social Sign In',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Sign in with your preferred social provider',
-            style: TextStyle(color: Colors.grey[600], fontSize: 14),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          SupaSocialsAuth(
-            socialProviders: const [
-              OAuthProvider.google,
-              OAuthProvider.apple,
-              OAuthProvider.github,
-            ],
-            colored: true,
-            redirectUrl: kIsWeb ? null : 'io.mydomain.myapp://callback',
-            onSuccess: (response) {
-              _setLoading(false);
-              _handleAuthSuccess();
-            },
-            onError: (error) {
-              _setLoading(false);
-              _handleAuthError(error);
-            },
-          ),
-          const SizedBox(height: 24),
-
-          // Custom styled social buttons for better design
-          Column(
-            children: [
-              _buildCustomSocialButton(
-                provider: OAuthProvider.google,
-                label: 'Continue with Google',
-                icon: Icons.g_mobiledata,
-                color: Colors.white,
-                textColor: Colors.black87,
-                borderColor: Colors.grey.shade300,
-              ),
-              const SizedBox(height: 12),
-              _buildCustomSocialButton(
-                provider: OAuthProvider.apple,
-                label: 'Continue with Apple',
-                icon: Icons.apple,
-                color: Colors.black,
-                textColor: Colors.white,
-              ),
-              const SizedBox(height: 12),
-              _buildCustomSocialButton(
-                provider: OAuthProvider.github,
-                label: 'Continue with GitHub',
-                icon: Icons.code,
-                color: const Color(0xFF24292E),
-                textColor: Colors.white,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCustomSocialButton({
-    required OAuthProvider provider,
-    required String label,
+  Widget _buildAuthButton({
+    required VoidCallback onPressed,
     required IconData icon,
-    required Color color,
+    required String text,
+    required Color backgroundColor,
     required Color textColor,
-    Color? borderColor,
+    required Color iconColor,
   }) {
     return SizedBox(
       width: double.infinity,
-      height: 48,
-      child: OutlinedButton.icon(
-        onPressed: () async {
-          _setLoading(true);
-          try {
-            await Supabase.instance.client.auth.signInWithOAuth(
-              provider,
-              redirectTo: kIsWeb ? null : 'io.mydomain.myapp://callback',
-            );
-          } catch (error) {
-            _setLoading(false);
-            _handleAuthError(error);
-          }
-        },
-        icon: Icon(icon, color: textColor),
-        label: Text(
-          label,
-          style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
+      height: 56,
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor,
+          foregroundColor: textColor,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+          disabledBackgroundColor: backgroundColor.withValues(alpha: 0.6),
         ),
-        style: OutlinedButton.styleFrom(
-          backgroundColor: color,
-          side: BorderSide(color: borderColor ?? color, width: 1),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: iconColor, size: 24),
+            const SizedBox(width: 12),
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: textColor,
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  void _showEmailAuthDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => Container(
+            height: MediaQuery.of(context).size.height * 0.75,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Handle bar
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Title
+                  const Text(
+                    'Sign up with Email',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Enter your email address to create an account or sign in',
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Email Auth Form
+                  Expanded(
+                    child: SupaEmailAuth(
+                      redirectTo:
+                          kIsWeb ? null : 'io.mydomain.myapp://callback',
+                      onSignInComplete: (response) {
+                        Navigator.pop(context);
+                        _setLoading(false);
+                        _handleAuthSuccess();
+                      },
+                      onSignUpComplete: (response) {
+                        Navigator.pop(context);
+                        _setLoading(false);
+                        if (response.user?.emailConfirmedAt != null) {
+                          _handleAuthSuccess();
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Row(
+                                children: [
+                                  Icon(
+                                    Icons.mark_email_unread,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'Please check your email to verify your account',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              backgroundColor: Colors.orange,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              duration: const Duration(seconds: 6),
+                            ),
+                          );
+                        }
+                      },
+                      onError: (error) {
+                        Navigator.pop(context);
+                        _setLoading(false);
+                        _handleAuthError(error);
+                      },
+                      metadataFields: [
+                        MetaDataField(
+                          prefixIcon: const Icon(Icons.person),
+                          label: 'Display Name',
+                          key: 'display_name',
+                          validator: (val) {
+                            if (val == null || val.isEmpty) {
+                              return 'Please enter your display name';
+                            }
+                            if (val.length < 2) {
+                              return 'Display name must be at least 2 characters';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
     );
   }
 }

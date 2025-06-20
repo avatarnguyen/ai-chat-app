@@ -49,8 +49,8 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String numberOfDataPoints(int value) {
-    final intl.NumberFormat valueNumberFormat = intl
-        .NumberFormat.compactCurrency(locale: localeName, decimalDigits: 2);
+    final intl.NumberFormat valueNumberFormat =
+        intl.NumberFormat.compactCurrency(locale: localeName, decimalDigits: 2);
     final String valueString = valueNumberFormat.format(value);
 
     return 'Número de puntos de datos: $valueString';

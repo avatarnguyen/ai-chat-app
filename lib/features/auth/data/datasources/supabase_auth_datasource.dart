@@ -4,13 +4,18 @@ import 'package:ai_chat_app/features/auth/data/models/user_model.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/repositories/auth_repository.dart' as repo;
+import '../services/google_oauth_service.dart';
+import '../services/apple_oauth_service.dart';
 
 /// Supabase implementation of authentication data source
 @singleton
 class SupabaseAuthDataSource {
-  SupabaseAuthDataSource() : _supabase = SupabaseConfig.client;
+  SupabaseAuthDataSource(this._googleOAuthService, this._appleOAuthService)
+    : _supabase = SupabaseConfig.client;
 
   final SupabaseClient _supabase;
+  final GoogleOAuthService _googleOAuthService;
+  final AppleOAuthService _appleOAuthService;
 
   /// Stream of authentication state changes
   Stream<UserModel?> get authStateChanges {
@@ -90,29 +95,33 @@ class SupabaseAuthDataSource {
   /// Sign in with Google OAuth
   Future<UserModel> signInWithGoogle() async {
     try {
-      final response = await _supabase.auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: '${SupabaseConfig.siteUrl}/auth/callback',
-      );
+      // Use native Google Sign-In for better user experience
+      final googleAccount = await _googleOAuthService.signIn();
+      if (googleAccount == null) {
+        throw const repo.InvalidCredentialsException();
+      }
 
-      if (!response) {
+      // Get Google authentication tokens
+      final googleAuth = await _googleOAuthService.getAuthentication();
+      if (googleAuth == null) {
         throw const repo.ServerException();
       }
 
-      // Wait for auth state change
-      final user = await _supabase.auth.onAuthStateChange
-          .where((data) => data.session?.user != null)
-          .first
-          .timeout(const Duration(seconds: 30));
+      // Sign in to Supabase with Google tokens
+      final response = await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: googleAuth.idToken!,
+        accessToken: googleAuth.accessToken,
+      );
 
-      if (user.session?.user == null) {
+      if (response.user == null) {
         throw const repo.ServerException();
       }
 
       // Create or update user profile
-      await _createOrUpdateUserProfile(user.session!.user);
+      await _createOrUpdateUserProfile(response.user!);
 
-      return _convertSupabaseUserToModel(user.session!.user);
+      return _convertSupabaseUserToModel(response.user!);
     } on AuthException catch (e) {
       throw _mapSupabaseAuthException(e);
     } catch (e) {
@@ -123,29 +132,33 @@ class SupabaseAuthDataSource {
   /// Sign in with Apple OAuth
   Future<UserModel> signInWithApple() async {
     try {
-      final response = await _supabase.auth.signInWithOAuth(
-        OAuthProvider.apple,
-        redirectTo: '${SupabaseConfig.siteUrl}/auth/callback',
+      // Check if Apple Sign-In is available
+      if (!await _appleOAuthService.isAvailable()) {
+        throw const repo.UnknownAuthException(
+          'Apple Sign In is not available on this device',
+        );
+      }
+
+      // Use native Apple Sign-In for better user experience
+      final appleCredential = await _appleOAuthService.signIn();
+
+      // Sign in to Supabase with Apple credential
+      final response = await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.apple,
+        idToken: appleCredential.identityToken!,
       );
 
-      if (!response) {
+      if (response.user == null) {
         throw const repo.ServerException();
       }
 
-      // Wait for auth state change
-      final user = await _supabase.auth.onAuthStateChange
-          .where((data) => data.session?.user != null)
-          .first
-          .timeout(const Duration(seconds: 30));
+      // Create or update user profile with Apple data
+      await _createOrUpdateUserProfileFromApple(
+        response.user!,
+        appleCredential,
+      );
 
-      if (user.session?.user == null) {
-        throw const repo.ServerException();
-      }
-
-      // Create or update user profile
-      await _createOrUpdateUserProfile(user.session!.user);
-
-      return _convertSupabaseUserToModel(user.session!.user);
+      return _convertSupabaseUserToModel(response.user!);
     } on AuthException catch (e) {
       throw _mapSupabaseAuthException(e);
     } catch (e) {
@@ -156,6 +169,14 @@ class SupabaseAuthDataSource {
   /// Sign out current user
   Future<void> signOut() async {
     try {
+      // Sign out from OAuth providers first
+      if (_googleOAuthService.isSignedIn) {
+        await _googleOAuthService.signOut();
+      }
+      // Apple Sign-In doesn't have a direct sign-out method
+      // It's handled through the Supabase session
+
+      // Sign out from Supabase
       await _supabase.auth.signOut();
     } on AuthException catch (e) {
       throw _mapSupabaseAuthException(e);
@@ -466,9 +487,45 @@ class SupabaseAuthDataSource {
       // Create new profile
       await _createUserProfile(
         user,
-        user.userMetadata?['display_name'] as String?,
+        user.userMetadata?['display_name'] as String? ??
+            user.userMetadata?['full_name'] as String?,
       );
     } else {
+      // Update last active
+      await _updateLastActive(user.id);
+    }
+  }
+
+  /// Create or update user profile specifically for Apple OAuth users
+  Future<void> _createOrUpdateUserProfileFromApple(
+    User user,
+    dynamic appleCredential,
+  ) async {
+    final existingProfile = await _getUserProfile(user.id);
+
+    String? displayName;
+    if (appleCredential != null) {
+      displayName = _appleOAuthService.getDisplayName(appleCredential);
+    }
+
+    displayName ??= user.userMetadata?['display_name'] as String?;
+    displayName ??= user.userMetadata?['full_name'] as String?;
+
+    if (existingProfile == null) {
+      // Create new profile with Apple-specific data
+      await _createUserProfile(user, displayName);
+    } else {
+      // Update existing profile if we have new display name info
+      if (displayName != null && existingProfile['display_name'] == null) {
+        await _supabase
+            .from('user_profiles')
+            .update({
+              'display_name': displayName,
+              'updated_at': DateTime.now().toIso8601String(),
+            })
+            .eq('user_id', user.id);
+      }
+
       // Update last active
       await _updateLastActive(user.id);
     }
