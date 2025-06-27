@@ -51,6 +51,21 @@ flutter test
 
 # Run specific test file
 flutter test test/path/to/test_file.dart
+
+# Run tests with coverage
+flutter test --coverage
+```
+
+### Code Quality
+```bash
+# Analyze code for linting issues
+flutter analyze
+
+# Format code
+dart format .
+
+# Fix auto-fixable lint issues
+dart fix --apply
 ```
 
 ## Key Dependencies
