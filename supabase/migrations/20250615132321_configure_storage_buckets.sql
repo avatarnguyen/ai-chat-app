@@ -304,19 +304,16 @@ CREATE TRIGGER on_attachment_upload
 -- INDEXES FOR PERFORMANCE
 -- =====================================================
 
--- Index on storage objects for faster bucket queries
-CREATE INDEX IF NOT EXISTS idx_storage_objects_bucket_id
-ON storage.objects(bucket_id);
-
--- Index on storage objects for user-specific queries
-CREATE INDEX IF NOT EXISTS idx_storage_objects_user_folder
-ON storage.objects(bucket_id, (storage.foldername(name))[1]);
+-- Note: Storage table indexes are managed by Supabase
+-- Custom indexes on storage.objects require superuser permissions
+-- and are not needed for basic functionality
 
 -- =====================================================
 -- COMMENTS AND DOCUMENTATION
 -- =====================================================
 
-COMMENT ON TABLE storage.buckets IS 'Storage buckets for file attachments, avatars, and exports';
+-- Note: Comments on storage tables require ownership permissions
+-- Documentation is provided inline with the code
 
 COMMENT ON FUNCTION cleanup_expired_exports() IS 'Removes expired export files from storage and updates database records';
 

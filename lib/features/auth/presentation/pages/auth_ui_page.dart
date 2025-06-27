@@ -1,3 +1,4 @@
+import 'package:ai_chat_app/core/utils/context_extension.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
@@ -82,27 +83,9 @@ class _AuthUIPageState extends State<AuthUIPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          duration: const Duration(seconds: 4),
+          duration: const Duration(seconds: 5),
         ),
       );
-    }
-  }
-
-  Future<void> _handleOAuthSignIn(OAuthProvider provider) async {
-    _setLoading(true);
-    try {
-      final result = await Supabase.instance.client.auth.signInWithOAuth(
-        provider,
-        redirectTo: kIsWeb ? null : 'io.mydomain.myapp://callback',
-      );
-
-      if (result == true) {
-        _setLoading(false);
-        _handleAuthSuccess();
-      }
-    } catch (error) {
-      _setLoading(false);
-      _handleAuthError(error);
     }
   }
 
@@ -147,45 +130,37 @@ class _AuthUIPageState extends State<AuthUIPage> {
                   // Authentication buttons
                   Column(
                     children: [
-                      // Sign up with Apple
-                      _buildAuthButton(
-                        onPressed:
-                            () => _handleOAuthSignIn(OAuthProvider.apple),
-                        icon: Icons.apple,
-                        text: 'Sign up with Apple',
-                        backgroundColor: Colors.white,
-                        textColor: Colors.black,
-                        iconColor: Colors.black,
+                      Theme(
+                        data: Theme.of(context).copyWith(
+                          elevatedButtonTheme: ElevatedButtonThemeData(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28),
+                              ),
+                              minimumSize: const Size(double.infinity, 56),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                        child: SupaSocialsAuth(
+                          socialProviders: [
+                            OAuthProvider.apple,
+                            OAuthProvider.google,
+                          ],
+                          colored: true,
+                          redirectUrl:
+                              kIsWeb
+                                  ? null
+                                  : 'io.supabase.flutter://reset-callback/',
+                          onSuccess: (Session response) {
+                            _handleAuthSuccess();
+                          },
+                          onError: (error) {
+                            _handleAuthError(error);
+                          },
+                        ),
                       ),
-
                       const SizedBox(height: 16),
-
-                      // Sign up with Facebook
-                      _buildAuthButton(
-                        onPressed:
-                            () => _handleOAuthSignIn(OAuthProvider.facebook),
-                        icon: Icons.facebook,
-                        text: 'Sign up with Facebook',
-                        backgroundColor: const Color(0xFF4267B2),
-                        textColor: Colors.white,
-                        iconColor: Colors.white,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Sign up with Google
-                      _buildAuthButton(
-                        onPressed:
-                            () => _handleOAuthSignIn(OAuthProvider.google),
-                        icon: Icons.g_mobiledata,
-                        text: 'Sign up with Google',
-                        backgroundColor: Colors.white,
-                        textColor: Colors.black,
-                        iconColor: Colors.black,
-                      ),
-
-                      const SizedBox(height: 16),
-
                       // Sign up with Email
                       _buildAuthButton(
                         onPressed: () => _showEmailAuthDialog(),
@@ -195,6 +170,7 @@ class _AuthUIPageState extends State<AuthUIPage> {
                         textColor: Colors.white,
                         iconColor: Colors.white,
                       ),
+                      const SizedBox(height: 16),
                     ],
                   ),
 
@@ -271,10 +247,12 @@ class _AuthUIPageState extends State<AuthUIPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      isDismissible: true,
       backgroundColor: Colors.transparent,
+      constraints: BoxConstraints(maxHeight: context.screenHeight(0.85)),
       builder:
           (context) => Container(
-            height: MediaQuery.of(context).size.height * 0.75,
+            padding: const EdgeInsets.all(24.0),
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
@@ -282,8 +260,7 @@ class _AuthUIPageState extends State<AuthUIPage> {
                 topRight: Radius.circular(20),
               ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
+            child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -299,7 +276,6 @@ class _AuthUIPageState extends State<AuthUIPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-
                   // Title
                   const Text(
                     'Sign up with Email',
@@ -313,70 +289,47 @@ class _AuthUIPageState extends State<AuthUIPage> {
                   const SizedBox(height: 32),
 
                   // Email Auth Form
-                  Expanded(
-                    child: SupaEmailAuth(
-                      redirectTo:
-                          kIsWeb ? null : 'io.mydomain.myapp://callback',
-                      onSignInComplete: (response) {
-                        Navigator.pop(context);
-                        _setLoading(false);
+                  SupaEmailAuth(
+                    onSignInComplete: (response) {
+                      Navigator.pop(context);
+                      _setLoading(false);
+                      _handleAuthSuccess();
+                    },
+                    onSignUpComplete: (response) {
+                      Navigator.pop(context);
+                      _setLoading(false);
+                      if (response.user?.emailConfirmedAt != null) {
                         _handleAuthSuccess();
-                      },
-                      onSignUpComplete: (response) {
-                        Navigator.pop(context);
-                        _setLoading(false);
-                        if (response.user?.emailConfirmedAt != null) {
-                          _handleAuthSuccess();
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Row(
-                                children: [
-                                  Icon(
-                                    Icons.mark_email_unread,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      'Please check your email to verify your account',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              backgroundColor: Colors.orange,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              duration: const Duration(seconds: 6),
-                            ),
-                          );
-                        }
-                      },
-                      onError: (error) {
-                        Navigator.pop(context);
-                        _setLoading(false);
-                        _handleAuthError(error);
-                      },
-                      metadataFields: [
-                        MetaDataField(
-                          prefixIcon: const Icon(Icons.person),
-                          label: 'Display Name',
-                          key: 'display_name',
-                          validator: (val) {
-                            if (val == null || val.isEmpty) {
-                              return 'Please enter your display name';
-                            }
-                            if (val.length < 2) {
-                              return 'Display name must be at least 2 characters';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ),
+                      } else {
+                        context.showPopup(
+                          'Please check your email to verify your account',
+                          iconData: Icons.mark_email_unread,
+                        );
+                      }
+                    },
+                    onError: (error) {
+                      Navigator.pop(context);
+                      _setLoading(false);
+                      _handleAuthError(error);
+                    },
+                    metadataFields: [
+                      MetaDataField(
+                        prefixIcon: const Icon(Icons.person),
+                        label: 'Display Name',
+                        key: 'display_name',
+                        validator: (val) {
+                          if (val == null || val.isEmpty) {
+                            return 'Please enter your display name';
+                          }
+                          if (val.length < 2) {
+                            return 'Display name must be at least 2 characters';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
                   ),
+                  SizedBox(height: MediaQuery.viewInsetsOf(context).bottom),
                 ],
               ),
             ),

@@ -140,12 +140,7 @@ class SupabaseConfig {
   };
 
   /// Site URL configuration for auth redirects
-  static String get siteUrl {
-    if (kDebugMode) {
-      return 'http://localhost:3000';
-    }
-    return 'https://your-production-domain.com';
-  }
+  static String get siteUrl => supabaseUrl;
 
   /// Redirect URLs for OAuth providers
   static List<String> get redirectUrls => [

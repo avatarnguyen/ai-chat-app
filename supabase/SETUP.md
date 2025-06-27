@@ -6,7 +6,7 @@ This guide will walk you through setting up Supabase backend for your AI Chat Ap
 
 - [x] Supabase CLI installed and updated (v2.24.3+)
 - [x] Supabase project initialized locally (`supabase init` completed)
-- [ ] Supabase cloud project created
+- [x] Supabase cloud project created
 - [ ] Environment variables configured
 
 ## Step 1: Create Supabase Cloud Project
@@ -69,7 +69,7 @@ Once your project is ready:
    ```bash
    supabase link --project-ref your-project-id
    ```
-   
+
    Replace `your-project-id` with the actual project ID from your Supabase dashboard URL.
 
 3. **Verify connection**:
@@ -84,7 +84,7 @@ The database schema includes these main tables:
 ### Core Tables
 - **`users`** - User profiles and metadata
 - **`conversations`** - Chat conversations
-- **`messages`** - Individual chat messages  
+- **`messages`** - Individual chat messages
 - **`folders`** - Organization folders for chats
 - **`api_keys`** - User's LLM provider API keys (encrypted)
 
@@ -102,7 +102,7 @@ The database schema includes these main tables:
    - Production: Your actual domain
 3. **Enable Auth Providers**:
    - **Email/Password**: Already enabled
-   - **Google OAuth**: 
+   - **Google OAuth**:
      - Get credentials from Google Cloud Console
      - Add Client ID and Secret
    - **Apple OAuth** (for iOS):
@@ -155,7 +155,7 @@ When ready for production:
 
 - [ ] RLS policies enabled on all tables
 - [ ] API keys stored securely (encrypted)
-- [ ] CORS configured for your domains only  
+- [ ] CORS configured for your domains only
 - [ ] Rate limiting enabled
 - [ ] Database backups configured
 - [ ] SSL certificates valid
