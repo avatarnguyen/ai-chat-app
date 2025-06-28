@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+Project Requirements are stored in .taskmaster/docs/
+
+Use task-master to manage tasks.
+
 ## Architecture
 
 This is a Flutter app using **Clean Architecture** with feature-driven development. The codebase is organized into:
@@ -19,7 +23,7 @@ This is a Flutter app using **Clean Architecture** with feature-driven developme
 # Development environment
 flutter run --flavor dev -t lib/main_dev.dart
 
-# Production environment  
+# Production environment
 flutter run --flavor prod -t lib/main_prod.dart
 ```
 
@@ -96,7 +100,7 @@ Supabase PostgreSQL with:
 
 Three Supabase storage buckets:
 - `chat-attachments` (private) - Message file attachments
-- `user-avatars` (public) - Profile pictures  
+- `user-avatars` (public) - Profile pictures
 - `conversation-exports` (private) - Exported conversations
 
 File handling services in `lib/core/services/`:

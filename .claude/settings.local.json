@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "mcp__taskmaster-ai__get_tasks",
+      "mcp__taskmaster-ai__next_task",
+      "mcp__taskmaster-ai__get_task",
+      "mcp__taskmaster-ai__set_task_status",
+      "Bash(flutter analyze:*)"
     ],
     "deny": []
   }
