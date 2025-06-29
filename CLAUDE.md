@@ -2,9 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Project Requirements are stored in .taskmaster/docs/
+Project Requirements are stored in `.taskmaster/docs/`
 
-Use task-master to manage tasks.
+Use task-master to manage tasks. Tasks are stored in `.taskmaster/tasks`
 
 ## Architecture
 
@@ -30,10 +30,10 @@ flutter run --flavor prod -t lib/main_prod.dart
 ### Code Generation
 ```bash
 # Generate dependency injection and JSON serialization
-flutter packages pub run build_runner build
+dart run build_runner build
 
 # Clean and rebuild
-flutter packages pub run build_runner build --delete-conflicting-outputs
+dart run build_runner build --delete-conflicting-outputs
 ```
 
 ### Supabase Local Development
