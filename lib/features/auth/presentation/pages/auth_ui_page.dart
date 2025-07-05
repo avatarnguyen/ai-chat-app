@@ -165,7 +165,7 @@ class _AuthUIPageState extends State<AuthUIPage> {
                       _buildAuthButton(
                         onPressed: () => _showEmailAuthDialog(),
                         icon: Icons.email,
-                        text: 'Sign up with Email',
+                        text: 'Sign in with Email',
                         backgroundColor: const Color(0xFF4CAF50),
                         textColor: Colors.white,
                         iconColor: Colors.white,
@@ -278,7 +278,7 @@ class _AuthUIPageState extends State<AuthUIPage> {
                   const SizedBox(height: 24),
                   // Title
                   const Text(
-                    'Sign up with Email',
+                    'Sign in with Email',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),

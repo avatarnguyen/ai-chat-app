@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ai_chat_app/l10n/l10n.dart';
 import 'core/di/bloc_providers.dart';
-import 'features/auth/presentation/widgets/auth_wrapper.dart';
-import 'features/auth/presentation/pages/auth_ui_page.dart';
-import 'features/home/presentation/pages/home_page.dart';
-import 'features/auth/domain/entities/user.dart';
+import 'core/navigation/app_router.dart';
 
 // Define color variables
 final Color pinkColor = const Color(0xFFDA79E5);
@@ -20,9 +17,10 @@ class MyApp extends StatelessWidget {
       providers: BlocProviders.repositoryProviders,
       child: MultiBlocProvider(
         providers: BlocProviders.providers,
-        child: MaterialApp(
+        child: MaterialApp.router(
           title: 'AI Chat App',
           debugShowCheckedModeBanner: false,
+          routerConfig: AppRouter.router,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: purpleColor),
             useMaterial3: true,
@@ -129,11 +127,6 @@ class MyApp extends StatelessWidget {
           themeMode: ThemeMode.system,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: const AuthWrapper(authenticatedBuilder: _buildHomePage),
-          routes: {
-            AuthUIPage.routeName: (context) => const AuthUIPage(),
-            HomePage.routeName: (context) => const HomePage(),
-          },
           builder: (context, child) {
             return Banner(
               message: 'Codika',
@@ -150,10 +143,5 @@ class MyApp extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// Builder for authenticated home page
-  static Widget _buildHomePage(BuildContext context, User user) {
-    return const HomePage();
   }
 }
